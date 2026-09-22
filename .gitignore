@@ -1,0 +1,42 @@
+# --- Secrets / environment ---
+.env
+.env.*
+.venv
+uv.lock
+!.env.example
+NOTES
+docs
+rag.ipynb
+docker.md 
+cmds.txt
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+__pycache__/
+
+# --- Virtual environments ---
+basicragenv/
+rbemv/
+.venv/
+venv/
+env/
+
+# --- Local vector store (migrated to Qdrant Cloud) ---
+data/faiss_index/
+
+# --- Runtime output ---
+logs/
+*.log
+
+# --- OS / editor cruft ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

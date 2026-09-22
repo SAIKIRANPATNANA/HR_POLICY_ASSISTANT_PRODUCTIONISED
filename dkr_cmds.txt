@@ -1,0 +1,39 @@
+newgrp docker
+docker --version
+docker compose version
+docker ps
+docker ps -a
+docker context use default
+docker build --load -t hr-assistant .
+docker run -d --name hr-assistant-app -p 8501:8501 --env-file .env.docker hr-assistant
+docker logs -f hr-assistant-app
+docker stop hr-assistant-app
+docker rm -f hr-assistant-app (stop and delete)
+docker stop $(docker ps -q) (stop all)
+docker tag hr-assistant saikiranpatnana/hr-assistant:latest
+docker push saikiranpatnana/hr-assistant:latest
+docker rmi saikiranpatnana/hr-assistant:latest
+docker pull saikiranpatnana/hr-assistant:latest
+docker run -d --name hr-assistant-from-hub -p 8501:8501 --env-file .env.docker saikiranpatnana/hr-assistant:latest
+docker logs -f hr-assistant-from-hub
+docker stop hr-assistant-from-hub
+docker rm hr-assistant hr-assistant-from-hub
+docker compose 
+docker compose config
+docker compose build
+docker compose up -d app
+docker compose logs -f app
+docker compose ps
+docker compose stop app
+docker compose rm -s -f app
+docker compose run --rm eval
+docker compose --profile tools up -d
+docker compose logs -f eval
+(after update docker compose yaml)
+docker compose build
+docker compose push
+docker compose --profile tools build
+docker compose --profile tools push
+
+
+

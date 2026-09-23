@@ -77,7 +77,7 @@ jobs:
   #       run: python evaluate.py
 
   build-and-push:
-    needs: evaluate
+    # needs: evaluate (uncomment if you enable the evaluate job above)
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.build.outputs.image }}

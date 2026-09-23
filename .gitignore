@@ -1,6 +1,9 @@
 # --- Secrets / environment ---
 .env
 .env.*
+*.pem
+*_accessKeys.csv
+*.csv
 .venv
 uv.lock
 !.env.example

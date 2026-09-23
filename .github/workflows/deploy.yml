@@ -111,13 +111,25 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Get ECR login token
+        id: ecr
+        run: |
+          TOKEN=$(aws ecr get-login-password --region ${{ env.AWS_REGION }})
+          echo "::add-mask::$TOKEN"
+          echo "token=$TOKEN" >> "$GITHUB_OUTPUT"
+
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.2.0
         env:
           IMAGE: ${{ needs.build-and-push.outputs.image }}
-          AWS_REGION: ${{ env.AWS_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          ECR_TOKEN: ${{ steps.ecr.outputs.token }}
           ENV_FILE_CONTENT: ${{ secrets.APP_ENV_FILE }}
           CONTAINER_NAME: ${{ env.CONTAINER_NAME }}
           APP_PORT: ${{ env.APP_PORT }}
@@ -125,28 +137,16 @@ jobs:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          envs: IMAGE,AWS_REGION,AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,ENV_FILE_CONTENT,CONTAINER_NAME,APP_PORT
+          envs: IMAGE,ECR_TOKEN,ENV_FILE_CONTENT,CONTAINER_NAME,APP_PORT
           script: |
             set -euo pipefail
 
-            # Install Docker on the box if it isn't there yet - makes a completely
-            # fresh instance deployable with zero manual setup beyond SSH access.
+            # Install Docker on the box if it isn't there yet
             if ! command -v docker >/dev/null 2>&1; then
               echo "==> Installing Docker"
               sudo apt-get update -y
               sudo apt-get install -y docker.io
               sudo systemctl enable --now docker
-            fi
-
-            # Install the AWS CLI on the box if it isn't there yet (needed to log into ECR).
-            if ! command -v aws >/dev/null 2>&1; then
-              echo "==> Installing AWS CLI v2 (official installer - apt's awscli package isn't reliably available)"
-              sudo apt-get update -y
-              sudo apt-get install -y curl unzip
-              curl -s "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "/tmp/awscliv2.zip"
-              unzip -q -o /tmp/awscliv2.zip -d /tmp
-              sudo /tmp/aws/install
-              rm -rf /tmp/awscliv2.zip /tmp/aws
             fi
 
             echo "==> Writing runtime .env"
@@ -155,8 +155,7 @@ jobs:
 
             echo "==> Logging in to ECR"
             REGISTRY=$(echo "$IMAGE" | cut -d'/' -f1)
-            aws ecr get-login-password --region "$AWS_REGION" \
-              | sudo docker login --username AWS --password-stdin "$REGISTRY"
+            echo "$ECR_TOKEN" | sudo docker login --username AWS --password-stdin "$REGISTRY"
 
             echo "==> Pulling new image: $IMAGE"
             sudo docker pull "$IMAGE"

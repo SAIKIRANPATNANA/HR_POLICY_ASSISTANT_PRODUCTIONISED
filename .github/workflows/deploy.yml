@@ -27,57 +27,57 @@ env:
   APP_PORT: 8501
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  #     - name: Write .env from secret
-  #       run: printf '%s' "${{ secrets.APP_ENV_FILE }}" > .env
+      - name: Write .env from secret
+        run: printf '%s' "${{ secrets.APP_ENV_FILE }}" > .env
 
-  #     - name: Install uv
-  #       uses: astral-sh/setup-uv@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
-  #     - name: Install dependencies
-  #       run: uv pip install --system -r requirements.txt
+      - name: Install dependencies
+        run: uv pip install --system -r requirements.txt
 
-  #     - name: Run smoke test (ask(agent, question))
-  #       run: python -m pytest tests/ -v
+      - name: Run smoke test (ask(agent, question))
+        run: python -m pytest tests/ -v
 
-  # evaluate:
-  #   needs: test
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout
-  #       uses: actions/checkout@v4
+  evaluate:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-  #     - name: Write .env from secret
-  #       run: printf '%s' "${{ secrets.APP_ENV_FILE }}" > .env
+      - name: Write .env from secret
+        run: printf '%s' "${{ secrets.APP_ENV_FILE }}" > .env
 
-  #     - name: Install uv
-  #       uses: astral-sh/setup-uv@v5
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
 
-  #     - name: Install dependencies
-  #       run: uv pip install --system -r requirements.txt
+      - name: Install dependencies
+        run: uv pip install --system -r requirements.txt
 
-  #     - name: Run evaluation suite (5 examples, keeps CI fast)
-  #       env:
-  #         EVAL_LIMIT: "5"
-  #       run: python evaluate.py
+      - name: Run evaluation suite (5 examples, keeps CI fast)
+        env:
+          EVAL_LIMIT: "5"
+        run: python evaluate.py
 
   build-and-push:
-    # needs: evaluate (uncomment if you enable the evaluate job above)
+    needs: evaluate 
     runs-on: ubuntu-latest
     outputs:
       image: ${{ steps.build.outputs.image }}
